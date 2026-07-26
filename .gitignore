@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+PRD.md
+DESIGN.md
+.agents/
+skills-lock.json
