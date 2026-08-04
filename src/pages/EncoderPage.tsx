@@ -1,7 +1,9 @@
 import { JsonPane } from '../components/editors/JsonPane';
 import { AlgSelect } from '../components/editors/AlgSelect';
 import { KeyInput } from '../components/editors/KeyInput';
+import { ExpirySelector } from '../components/editors/ExpirySelector';
 import { VerifyBadge } from '../components/badges/VerifyBadge';
+import { ExpiryBadge } from '../components/badges/ExpiryBadge';
 import { headerClaims, standardClaims } from '../core/jwt/claims';
 import type { UseJwtReturn } from '../hooks/useJwt';
 
@@ -19,6 +21,8 @@ export function EncoderPage(jwt: UseJwtReturn) {
         </div>
         <JsonPane title="Header" value={header} onChange={setHeader} accentClass="pane--header" claimsTable={headerClaims} />
         <JsonPane title="Payload" value={payload} onChange={setPayload} accentClass="pane--payload" claimsTable={standardClaims} />
+        <ExpirySelector payload={payload} onChange={setPayload} />
+        <ExpiryBadge payload={payload} />
       </section>
 
       <section className="app__column">

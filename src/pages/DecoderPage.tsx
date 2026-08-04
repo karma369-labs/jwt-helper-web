@@ -20,11 +20,8 @@ export function DecoderPage(jwt: UseJwtReturn) {
       <section className="app__column">
         <h2>Decoded</h2>
         <JsonPane title="Header" value={header} onChange={setHeader} accentClass="pane--header" claimsTable={headerClaims} />
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-          <JsonPane title="Payload" value={payload} onChange={() => {}} accentClass="pane--payload" claimsTable={standardClaims} readOnly />
-          <ExpiryBadge payload={payload} />
-        </div>
+        <JsonPane title="Payload" value={payload} onChange={() => {}} accentClass="pane--payload" claimsTable={standardClaims} readOnly />
+        <ExpiryBadge payload={payload} />
 
         <div className="signature-panel">
           <KeyInput keyInputType={keyInputType} keyMaterial={keyMaterial} onChange={setKeyMaterial} variant="verify" />

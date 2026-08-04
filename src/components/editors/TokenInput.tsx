@@ -37,6 +37,9 @@ function TokenInputImpl({ token, onChange, onClear, parseError }: Props) {
   const handleBlur = () => {
     if (token.length > 0) {
       setIsEditing(false);
+      // discard an invalid draft rather than leaving `text` mismatched with
+      // what the viewer (which shows the last valid `token`) just displayed
+      if (parseError) setText(token);
     }
   };
 
