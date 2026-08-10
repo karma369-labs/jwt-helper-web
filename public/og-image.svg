@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="0%" r="75%">
+      <stop offset="0%" stop-color="#16171d"/>
+      <stop offset="100%" stop-color="#010102"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect x="0.5" y="0.5" width="1199" height="629" fill="none" stroke="#23252a"/>
+
+  <circle cx="120" cy="120" r="18" fill="#ff657a"/>
+  <circle cx="168" cy="120" r="18" fill="#ffb86c"/>
+  <circle cx="216" cy="120" r="18" fill="#00f2fe"/>
+
+  <text x="120" y="300" font-family="Menlo, 'JetBrains Mono', monospace" font-size="72" font-weight="700" fill="#f7f8f8">JWT Debugger</text>
+  <text x="120" y="360" font-family="-apple-system, 'Segoe UI', Arial, sans-serif" font-size="30" fill="#8a8f98">Decode, verify &amp; generate JSON Web Tokens — entirely in your browser</text>
+
+  <text x="120" y="440" font-family="'JetBrains Mono', monospace" font-size="22" fill="#62666d">
+    <tspan fill="#ff657a">eyJhbGciOiJIUzI1NiJ9</tspan><tspan fill="#8a8f98">.</tspan><tspan fill="#ffb86c">eyJzdWIiOiIxMjM0NTY3ODkwIn0</tspan><tspan fill="#8a8f98">.</tspan><tspan fill="#00f2fe">4-3xR9m…</tspan>
+  </text>
+
+  <text x="120" y="540" font-family="-apple-system, 'Segoe UI', Arial, sans-serif" font-size="24" font-weight="600" fill="#5e6ad2">jwtdev.com</text>
+</svg>

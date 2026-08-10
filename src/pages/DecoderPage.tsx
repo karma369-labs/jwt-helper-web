@@ -1,5 +1,5 @@
 import { TokenInput } from '../components/editors/TokenInput';
-import { JsonPane } from '../components/editors/JsonPane';
+import { LazyJsonPane as JsonPane } from '../components/editors/LazyJsonPane';
 import { KeyInput } from '../components/editors/KeyInput';
 import { VerifyBadge } from '../components/badges/VerifyBadge';
 import { ExpiryBadge } from '../components/badges/ExpiryBadge';

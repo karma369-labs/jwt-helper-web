@@ -404,6 +404,12 @@ button:focus-visible {
   text-transform: lowercase;
 }
 
+/* Matches the CodeMirror editor's fixed height, so the pane doesn't jump once the async chunk loads. */
+.json-pane__skeleton {
+  height: 200px;
+  background: var(--surface-1);
+}
+
 .json-pane__controls {
   display: flex;
   align-items: center;
@@ -615,6 +621,11 @@ button:focus-visible {
   color: var(--ink-subtle);
   margin: 0;
   line-height: 1.4;
+}
+
+.key-section__optional-tag {
+  font-weight: 400;
+  color: var(--ink-subtle);
 }
 
 .key-input__row {

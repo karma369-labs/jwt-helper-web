@@ -4,7 +4,7 @@ import { json } from '@codemirror/lang-json';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { buildClaimRows, type ClaimMeta } from '../../core/jwt/claims';
 
-interface Props {
+export interface JsonPaneProps {
   title: string;
   value: Record<string, unknown>;
   onChange: (value: Record<string, unknown>) => void;
@@ -15,7 +15,7 @@ interface Props {
 
 type ViewMode = 'json' | 'claims';
 
-function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOnly = false }: Props) {
+function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOnly = false }: JsonPaneProps) {
   const [view, setView] = useState<ViewMode>('json');
   // Local text buffer so the user can type invalid-JSON-in-progress without losing keystrokes.
   const [text, setText] = useState(() => JSON.stringify(value, null, 2));

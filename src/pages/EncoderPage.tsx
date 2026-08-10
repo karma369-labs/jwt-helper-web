@@ -1,4 +1,4 @@
-import { JsonPane } from '../components/editors/JsonPane';
+import { LazyJsonPane as JsonPane } from '../components/editors/LazyJsonPane';
 import { AlgSelect } from '../components/editors/AlgSelect';
 import { KeyInput } from '../components/editors/KeyInput';
 import { ExpirySelector } from '../components/editors/ExpirySelector';

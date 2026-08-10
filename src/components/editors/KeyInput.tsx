@@ -35,17 +35,6 @@ function KeyInputImpl({ keyInputType, keyMaterial, onChange, variant = 'sign' }:
             placeholder="your-256-bit-secret"
           />
         </div>
-      ) : variant === 'verify' ? (
-        // verifying only ever needs the public key — asking for a private key here is wrong
-        <div className="key-input">
-          <label htmlFor="key-public">Public Key</label>
-          <textarea
-            id="key-public"
-            value={keyMaterial.publicKey ?? ''}
-            onChange={(e) => onChange({ ...keyMaterial, publicKey: e.target.value })}
-            placeholder="-----BEGIN PUBLIC KEY-----"
-          />
-        </div>
       ) : (
         <div className="key-input key-input--pair">
           <div>
@@ -58,7 +47,11 @@ function KeyInputImpl({ keyInputType, keyMaterial, onChange, variant = 'sign' }:
             />
           </div>
           <div>
-            <label htmlFor="key-private">Private Key</label>
+            {/* Editing header/payload always re-signs (see useJwt's EditOrigin model), even on the
+                Decoder — so the private key has to be collectable here too, or that re-sign silently
+                fails with a confusing PKCS8 error and no way to fix it. Optional: only needed if you
+                edit content; pasting/verifying an as-is token only ever uses the public key above. */}
+            <label htmlFor="key-private">Private Key {variant === 'verify' && <span className="key-section__optional-tag">(optional — only if editing header/payload)</span>}</label>
             <textarea
               id="key-private"
               value={keyMaterial.privateKey ?? ''}

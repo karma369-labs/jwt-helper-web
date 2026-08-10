@@ -1,0 +1,16 @@
+{
+  "name": "JWT Debugger — Decode, Verify & Generate JSON Web Tokens",
+  "short_name": "JWT Debugger",
+  "description": "A free, client-side JWT debugger. Decode, verify, and generate JSON Web Tokens (HS256/384/512, RS256/384/512, ES256/384/512) entirely in your browser — nothing is sent to a server.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#010102",
+  "theme_color": "#010102",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
