@@ -3,6 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { buildClaimRows, type ClaimMeta } from '../../core/jwt/claims';
+import { track, trackThrottled } from '../../core/analytics';
 
 export interface JsonPaneProps {
   title: string;
@@ -17,6 +18,8 @@ type ViewMode = 'json' | 'claims';
 
 function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOnly = false }: JsonPaneProps) {
   const [view, setView] = useState<ViewMode>('json');
+  // 'Header' / 'Payload' — the pane identity every event below is tagged with.
+  const pane = title.toLowerCase();
   // Local text buffer so the user can type invalid-JSON-in-progress without losing keystrokes.
   const [text, setText] = useState(() => JSON.stringify(value, null, 2));
   const [error, setError] = useState<string | null>(null);
@@ -37,10 +40,19 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
       onChange(parsed);
     } catch {
       setError('Invalid JSON');
+      trackThrottled('json_invalid', { pane }, 3000, `json_invalid:${pane}`);
     }
   };
 
-  const handleCopy = () => navigator.clipboard.writeText(text);
+  const handleCopy = () => {
+    track('copy', { target: pane });
+    navigator.clipboard.writeText(text);
+  };
+
+  const handleViewChange = (next: ViewMode) => {
+    if (next !== view) track('json_view_changed', { pane, view: next });
+    setView(next);
+  };
 
   return (
     <div className={`json-pane ${accentClass}`}>
@@ -54,14 +66,14 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
             <button
               type="button"
               className={view === 'json' ? 'active' : ''}
-              onClick={() => setView('json')}
+              onClick={() => handleViewChange('json')}
             >
               JSON
             </button>
             <button
               type="button"
               className={view === 'claims' ? 'active' : ''}
-              onClick={() => setView('claims')}
+              onClick={() => handleViewChange('claims')}
             >
               Claims Breakdown
             </button>

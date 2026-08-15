@@ -3,6 +3,16 @@ import { decodeJwt, signingInputFromSegments, assembleToken, JwtFormatError } fr
 import { base64UrlEncode } from '../core/jwt/base64url';
 import { algorithms, type KeyMaterial } from '../core/jwt/algorithms';
 import { useDebounce } from './useDebounce';
+import { lengthBucket, shorten, track, trackThrottled } from '../core/analytics';
+
+/**
+ * Own-property lookup: `alg` comes from user-supplied JSON, so a plain
+ * `algorithms[alg]` would resolve inherited members — `{"alg":"toString"}`
+ * yields a truthy non-handler and blows up the verify path below.
+ */
+function lookupAlg(alg: string | undefined) {
+  return alg && Object.hasOwn(algorithms, alg) ? algorithms[alg] : undefined;
+}
 
 // Where a change came from: verify-as-is (paste / decoder key edit) vs re-sign (content edit / encoder key edit).
 type EditOrigin = 'paste' | 'content' | 'key';
@@ -147,12 +157,17 @@ export function useJwt() {
 
   // Immediate, un-debounced — only for keyInputType (instant field swap on alg change).
   const alg = state.header.alg as string | undefined;
-  const handler = alg ? algorithms[alg] : undefined;
+  const handler = lookupAlg(alg);
 
   const [verify, setVerify] = useReducer(
     (_prev: VerifyState, next: VerifyState) => next,
     { status: 'idle' } as VerifyState
   );
+
+  // Parse failures are a first-class funnel signal: someone pasted something that isn't a JWT.
+  useEffect(() => {
+    if (state.parseError) track('token_parse_error', { reason: shorten(state.parseError) });
+  }, [state.parseError]);
 
   useEffect(() => {
     let cancelled = false;
@@ -165,16 +180,28 @@ export function useJwt() {
 
     // derive alg/handler from the debounced snapshot, not the immediate `alg` above, to avoid signing with a stale header mid-switch
     const debouncedAlg = debouncedInputs.header.alg as string | undefined;
-    const debouncedHandler = debouncedAlg ? algorithms[debouncedAlg] : undefined;
+    const debouncedHandler = lookupAlg(debouncedAlg);
+    const mode = debouncedInputs.lastEdit === 'content' ? 'sign' : 'verify';
+    // Only ever report a known registry name — an alg from a pasted token is arbitrary user input.
+    const reportedAlg = debouncedHandler ? debouncedAlg : 'unsupported';
 
     if (!debouncedHandler) {
       setVerify({
         status: 'unsupported-alg',
         message: debouncedAlg ? `Unknown algorithm: ${debouncedAlg}` : 'No algorithm specified',
       });
+      track('verify_result', { result: 'unsupported_alg', mode, has_alg: !!debouncedAlg });
       return;
     }
     setVerify({ status: 'checking' });
+
+    const report = (result: string, reason?: string) =>
+      track('verify_result', {
+        result,
+        mode,
+        alg: reportedAlg,
+        reason: reason ? shorten(reason) : undefined,
+      });
 
     if (debouncedInputs.lastEdit === 'content') {
       // authoring: re-sign, then store the segments jose actually produced
@@ -187,11 +214,14 @@ export function useJwt() {
           const result = await debouncedHandler.verify(signedToken, debouncedInputs.keyMaterial);
           if (!cancelled) {
             setVerify(result.valid ? { status: 'valid' } : { status: 'invalid', message: result.error });
+            report(result.valid ? 'valid' : 'invalid', result.error);
           }
         })
         .catch((err) => {
           if (!cancelled) {
-            setVerify({ status: 'invalid', message: err instanceof Error ? err.message : 'Signing failed' });
+            const message = err instanceof Error ? err.message : 'Signing failed';
+            setVerify({ status: 'invalid', message });
+            report('sign_error', message);
           }
         });
     } else {
@@ -203,11 +233,14 @@ export function useJwt() {
         .then((result) => {
           if (!cancelled) {
             setVerify(result.valid ? { status: 'valid' } : { status: 'invalid', message: result.error });
+            report(result.valid ? 'valid' : 'invalid', result.error);
           }
         })
         .catch((err) => {
           if (!cancelled) {
-            setVerify({ status: 'invalid', message: err instanceof Error ? err.message : 'Verification failed' });
+            const message = err instanceof Error ? err.message : 'Verification failed';
+            setVerify({ status: 'invalid', message });
+            report('verify_error', message);
           }
         });
     }
@@ -218,11 +251,31 @@ export function useJwt() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedInputs]);
 
-  const setToken = useCallback((t: string) => dispatch({ type: 'SET_TOKEN', token: t }), []);
-  const clearToken = useCallback(() => dispatch({ type: 'CLEAR' }), []);
-  const setHeader = useCallback((h: Record<string, unknown>) => dispatch({ type: 'SET_HEADER', header: h }), []);
-  const setPayload = useCallback((p: Record<string, unknown>) => dispatch({ type: 'SET_PAYLOAD', payload: p }), []);
-  const setAlg = useCallback((a: string) => dispatch({ type: 'SET_ALG', alg: a }), []);
+  // Typing-driven callbacks report shape only (bucketed length, segment count) and are throttled
+  // so a burst of keystrokes becomes one signal rather than one event per character.
+  const setToken = useCallback((t: string) => {
+    trackThrottled('token_input', {
+      length: lengthBucket(t.length),
+      segments: t.length ? t.split('.').length : 0,
+    });
+    dispatch({ type: 'SET_TOKEN', token: t });
+  }, []);
+  const clearToken = useCallback(() => {
+    track('token_cleared');
+    dispatch({ type: 'CLEAR' });
+  }, []);
+  const setHeader = useCallback((h: Record<string, unknown>) => {
+    trackThrottled('json_edited', { pane: 'header' }, 3000, 'json_edited:header');
+    dispatch({ type: 'SET_HEADER', header: h });
+  }, []);
+  const setPayload = useCallback((p: Record<string, unknown>) => {
+    trackThrottled('json_edited', { pane: 'payload' }, 3000, 'json_edited:payload');
+    dispatch({ type: 'SET_PAYLOAD', payload: p });
+  }, []);
+  const setAlg = useCallback((a: string) => {
+    track('alg_changed', { alg: Object.hasOwn(algorithms, a) ? a : 'unsupported' });
+    dispatch({ type: 'SET_ALG', alg: a });
+  }, []);
   // decoder: verify existing signature against new key
   const setKeyMaterial = useCallback(
     (k: KeyMaterial) => dispatch({ type: 'SET_KEY_MATERIAL', keyMaterial: k, origin: 'verify' }),

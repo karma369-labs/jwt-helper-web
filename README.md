@@ -66,6 +66,7 @@ HS256/384/512, RS256/384/512, ES256/384/512.
 - No base64url-encoded-secret toggle, no auto-focus toggle, no share-link/URL-encoded state yet.
 
 ## Security notes
-- All crypto runs client-side only (WebCrypto via `jose`); nothing is sent to a server.
+- All crypto runs client-side only (WebCrypto via `jose`); no token or key material is sent to a server.
+- The site does send anonymous usage analytics (Google Analytics 4). Only interaction *shape* is reported — which tab you're on, which algorithm you picked, whether verification passed, coarse length buckets. Token contents, header/payload claim values, secrets, and keys are never included; `src/core/analytics.ts` drops any value that is over-long or PEM/JWT-shaped as a backstop.
 - The `alg` in a token header is never auto-trusted — verification always uses the algorithm you explicitly select/enter a key for.
 - A signature is never silently regenerated to mask tampering (see State model above).

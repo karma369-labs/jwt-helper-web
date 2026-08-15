@@ -1,4 +1,5 @@
 import { memo, useState, useRef, useEffect } from 'react';
+import { track } from '../../core/analytics';
 
 interface Props {
   token: string;
@@ -31,7 +32,13 @@ function TokenInputImpl({ token, onChange, onClear, parseError }: Props) {
   }, [isEditing]);
 
   const handleViewerClick = () => {
+    track('token_edit_started');
     setIsEditing(true);
+  };
+
+  const handleCopy = () => {
+    track('copy', { target: 'token' });
+    navigator.clipboard.writeText(token);
   };
 
   const handleBlur = () => {
@@ -68,7 +75,7 @@ function TokenInputImpl({ token, onChange, onClear, parseError }: Props) {
   return (
     <div className="token-input">
       <div className="token-input__toolbar">
-        <button type="button" className="button-secondary" onClick={() => navigator.clipboard.writeText(token)} disabled={isEmpty}>
+        <button type="button" className="button-secondary" onClick={handleCopy} disabled={isEmpty}>
           Copy
         </button>
         <button type="button" className="button-secondary" onClick={handleClear} disabled={isEmpty}>

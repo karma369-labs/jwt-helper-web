@@ -1,4 +1,5 @@
 import { memo, useState } from 'react';
+import { track } from '../../core/analytics';
 
 interface Props {
   payload: Record<string, unknown>;
@@ -51,6 +52,8 @@ function ExpirySelectorImpl({ payload, onChange }: Props) {
   };
 
   const handlePresetChange = (value: string) => {
+    // The preset key ('15m', '1h', 'none') is app vocabulary, not user data.
+    track('expiry_changed', { preset: value });
     if (value === 'none') {
       applyExp(undefined, 'none');
       return;
@@ -62,7 +65,11 @@ function ExpirySelectorImpl({ payload, onChange }: Props) {
   const handleDateChange = (value: string) => {
     if (!value) return;
     const ms = new Date(value).getTime();
-    if (!Number.isNaN(ms)) applyExp(Math.floor(ms / 1000), 'custom');
+    if (!Number.isNaN(ms)) {
+      // The chosen date is user content, so only the fact of a custom pick is reported.
+      track('expiry_changed', { preset: 'custom' });
+      applyExp(Math.floor(ms / 1000), 'custom');
+    }
   };
 
   return (

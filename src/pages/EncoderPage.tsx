@@ -6,6 +6,7 @@ import { VerifyBadge } from '../components/badges/VerifyBadge';
 import { ExpiryBadge } from '../components/badges/ExpiryBadge';
 import { headerClaims, standardClaims } from '../core/jwt/claims';
 import type { UseJwtReturn } from '../hooks/useJwt';
+import { track } from '../core/analytics';
 
 // Encoder page: build-a-token workflow. Left = header/payload, right = key + signed output.
 export function EncoderPage(jwt: UseJwtReturn) {
@@ -37,7 +38,10 @@ export function EncoderPage(jwt: UseJwtReturn) {
             <button
               type="button"
               className="button-secondary"
-              onClick={() => navigator.clipboard.writeText(token)}
+              onClick={() => {
+                track('copy', { target: 'encoded_token' });
+                navigator.clipboard.writeText(token);
+              }}
             >
               Copy
             </button>
