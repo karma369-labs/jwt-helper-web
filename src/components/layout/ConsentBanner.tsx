@@ -1,8 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getStoredConsent, setConsent, type ConsentValue } from '../../core/analytics';
 
 export function ConsentBanner() {
-  const [visible, setVisible] = useState(() => getStoredConsent() === null);
+  // Must start hidden and reveal in an effect, not read localStorage in the useState
+  // initialiser: this component is prerendered to static HTML at build time, where
+  // localStorage does not exist, and any value read on the client would disagree with
+  // the prerendered markup and trip a hydration mismatch.
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (getStoredConsent() === null) setVisible(true);
+  }, []);
 
   if (!visible) return null;
 

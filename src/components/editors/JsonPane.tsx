@@ -4,27 +4,25 @@ import { json } from '@codemirror/lang-json';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { buildClaimRows, type ClaimMeta } from '../../core/jwt/claims';
 import { track, trackThrottled } from '../../core/analytics';
+import { useCopy } from '../../hooks/useCopy';
 
 export interface JsonPaneProps {
   title: string;
   value: Record<string, unknown>;
   onChange: (value: Record<string, unknown>) => void;
   accentClass: string;
-  claimsTable: Record<string, ClaimMeta>; // headerClaims or standardClaims, drives the Claims Breakdown view
-  readOnly?: boolean; // decoder's payload pane is inspect-only
+  claimsTable: Record<string, ClaimMeta>;
+  readOnly?: boolean;
 }
 
 type ViewMode = 'json' | 'claims';
 
 function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOnly = false }: JsonPaneProps) {
   const [view, setView] = useState<ViewMode>('json');
-  // 'Header' / 'Payload' — the pane identity every event below is tagged with.
   const pane = title.toLowerCase();
-  // Local text buffer so the user can type invalid-JSON-in-progress without losing keystrokes.
   const [text, setText] = useState(() => JSON.stringify(value, null, 2));
   const [error, setError] = useState<string | null>(null);
 
-  // Sync state with incoming props during render to avoid effects, ensuring no flash of stale content.
   const [prevValue, setPrevValue] = useState(value);
   if (value !== prevValue) {
     setPrevValue(value);
@@ -44,10 +42,7 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
     }
   };
 
-  const handleCopy = () => {
-    track('copy', { target: pane });
-    navigator.clipboard.writeText(text);
-  };
+  const { copied, copy } = useCopy(pane);
 
   const handleViewChange = (next: ViewMode) => {
     if (next !== view) track('json_view_changed', { pane, view: next });
@@ -57,14 +52,18 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
   return (
     <div className={`json-pane ${accentClass}`}>
       <div className="json-pane__header">
-        <span>
-          {title}
-          {readOnly && <span className="json-pane__readonly-tag"> (read-only)</span>}
-        </span>
+        <div className="json-pane__title-wrap">
+          <span className="pane-pip" />
+          <span className="json-pane__title">{title}</span>
+          {readOnly && <span className="json-pane__readonly-tag">read-only</span>}
+        </div>
+
         <div className="json-pane__controls">
-          <div className="json-pane__view-toggle">
+          <div className="json-pane__view-toggle" role="tablist" aria-label={`${title} view modes`}>
             <button
               type="button"
+              role="tab"
+              aria-selected={view === 'json'}
               className={view === 'json' ? 'active' : ''}
               onClick={() => handleViewChange('json')}
             >
@@ -72,15 +71,39 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={view === 'claims'}
               className={view === 'claims' ? 'active' : ''}
               onClick={() => handleViewChange('claims')}
             >
-              Claims Breakdown
+              Claims
             </button>
           </div>
+
           {error && <span className="json-pane__error">{error}</span>}
-          <button type="button" className="json-pane__copy" onClick={handleCopy}>
-            Copy
+
+          <button
+            type="button"
+            className={`json-pane__copy ${copied ? 'button--copied' : ''}`}
+            onClick={() => copy(text)}
+            aria-label={`Copy ${title} JSON`}
+          >
+            {copied ? (
+              <>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Copied</span>
+              </>
+            ) : (
+              <>
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+                  <path d="M2 8.5V2.5C2 1.94772 2.44772 1.5 3 1.5H9" stroke="currentColor" strokeWidth="1.2"/>
+                </svg>
+                <span>Copy</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -88,7 +111,8 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
       {view === 'json' ? (
         <CodeMirror
           value={text}
-          height="200px"
+          minHeight="96px"
+          maxHeight="340px"
           theme={oneDark}
           extensions={[json()]}
           onChange={handleChange}
@@ -112,5 +136,5 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
   );
 }
 
-// Memoized: only re-renders when its own slice of state changes, per PRD perf requirements.
 export const JsonPane = memo(JsonPaneImpl);
+

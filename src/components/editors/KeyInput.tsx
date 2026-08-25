@@ -1,18 +1,18 @@
 import { memo } from 'react';
 import type { KeyMaterial, KeyInputType } from '../../core/jwt/algorithms';
-import { track, trackThrottled } from '../../core/analytics';
+import { trackThrottled } from '../../core/analytics';
+import { useCopy } from '../../hooks/useCopy';
 
 interface Props {
   keyInputType: KeyInputType;
   keyMaterial: KeyMaterial;
   onChange: (key: KeyMaterial) => void;
-  /** Decoder shows this as an optional verification step; Encoder needs it to sign. Changes the heading/copy only. */
   variant?: 'verify' | 'sign';
 }
 
 function KeyInputImpl({ keyInputType, keyMaterial, onChange, variant = 'sign' }: Props) {
-  // Records *that* a key field was touched and whether it ended up non-empty —
-  // never the key itself. Throttled per field so typing sends one event, not one per keystroke.
+  const { copied, copy } = useCopy('secret');
+
   const editKey = (field: string, next: KeyMaterial, value: string) => {
     trackThrottled(
       'key_input',
@@ -25,66 +25,88 @@ function KeyInputImpl({ keyInputType, keyMaterial, onChange, variant = 'sign' }:
 
   return (
     <div className="key-section">
-      <h3>
-        JWT Signature {variant === 'verify' ? 'Verification (Optional)' : 'Signing'}
-      </h3>
-      <p className="key-section__hint">
-        {variant === 'verify'
-          ? 'Enter the secret/key used to sign the JWT below:'
-          : 'Enter a secret/key to sign the token with:'}
-      </p>
+      <div className="card-header-bar">
+        <div className="card-header-bar__title-wrap">
+          <span className="key-pip" />
+          <span className="card-header-bar__title">
+            {variant === 'verify' ? 'Signature Verification' : 'Signature Key'}
+          </span>
+          {variant === 'verify' && <span className="card-header-bar__tag">optional</span>}
+        </div>
+        <span className="card-header-bar__hint">
+          {keyInputType === 'secret' ? 'HMAC secret' : 'Key pair'}
+        </span>
+      </div>
 
-      {keyInputType === 'secret' ? (
-        <div className="key-input">
-          <div className="key-input__row">
-            <label htmlFor="key-secret">Secret</label>
-            <button
-              type="button"
-              className="button-secondary"
-              onClick={() => {
-                track('copy', { target: 'secret' });
-                navigator.clipboard.writeText(keyMaterial.secret ?? '');
-              }}
-            >
-              Copy
-            </button>
-          </div>
-          <input
-            id="key-secret"
-            type="text"
-            value={keyMaterial.secret ?? ''}
-            onChange={(e) => editKey('secret', { ...keyMaterial, secret: e.target.value }, e.target.value)}
-            placeholder="your-256-bit-secret"
-          />
-        </div>
-      ) : (
-        <div className="key-input key-input--pair">
-          <div>
-            <label htmlFor="key-public">Public Key</label>
-            <textarea
-              id="key-public"
-              value={keyMaterial.publicKey ?? ''}
-              onChange={(e) => editKey('public_key', { ...keyMaterial, publicKey: e.target.value }, e.target.value)}
-              placeholder="-----BEGIN PUBLIC KEY-----"
+      <div className="key-section__body">
+        {keyInputType === 'secret' ? (
+          <div className="key-input">
+            <div className="key-input__row">
+              <label htmlFor="key-secret">Secret Key</label>
+              <button
+                type="button"
+                className={`button-secondary ${copied ? 'button--copied' : ''}`}
+                onClick={() => copy(keyMaterial.secret ?? '')}
+              >
+                {copied ? (
+                  <>
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+                      <path d="M2 8.5V2.5C2 1.94772 2.44772 1.5 3 1.5H9" stroke="currentColor" strokeWidth="1.2"/>
+                    </svg>
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <input
+              id="key-secret"
+              type="text"
+              className="key-secret-input"
+              value={keyMaterial.secret ?? ''}
+              onChange={(e) => editKey('secret', { ...keyMaterial, secret: e.target.value }, e.target.value)}
+              placeholder="your-256-bit-secret"
+              spellCheck={false}
             />
           </div>
-          <div>
-            {/* Editing header/payload always re-signs (see useJwt's EditOrigin model), even on the
-                Decoder — so the private key has to be collectable here too, or that re-sign silently
-                fails with a confusing PKCS8 error and no way to fix it. Optional: only needed if you
-                edit content; pasting/verifying an as-is token only ever uses the public key above. */}
-            <label htmlFor="key-private">Private Key {variant === 'verify' && <span className="key-section__optional-tag">(optional — only if editing header/payload)</span>}</label>
-            <textarea
-              id="key-private"
-              value={keyMaterial.privateKey ?? ''}
-              onChange={(e) => editKey('private_key', { ...keyMaterial, privateKey: e.target.value }, e.target.value)}
-              placeholder="-----BEGIN PRIVATE KEY-----"
-            />
+        ) : (
+          <div className="key-input key-input--pair">
+            <div className="key-input-field">
+              <label htmlFor="key-public">Public Key (SPKI / PEM)</label>
+              <textarea
+                id="key-public"
+                value={keyMaterial.publicKey ?? ''}
+                onChange={(e) => editKey('public_key', { ...keyMaterial, publicKey: e.target.value }, e.target.value)}
+                placeholder="-----BEGIN PUBLIC KEY-----"
+                spellCheck={false}
+              />
+            </div>
+            <div className="key-input-field">
+              <label htmlFor="key-private">
+                Private Key {variant === 'verify' && <span className="key-section__optional-tag">(optional)</span>}
+              </label>
+              <textarea
+                id="key-private"
+                value={keyMaterial.privateKey ?? ''}
+                onChange={(e) => editKey('private_key', { ...keyMaterial, privateKey: e.target.value }, e.target.value)}
+                placeholder="-----BEGIN PRIVATE KEY-----"
+                spellCheck={false}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
 export const KeyInput = memo(KeyInputImpl);
+
+

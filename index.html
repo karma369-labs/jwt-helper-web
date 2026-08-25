@@ -7,50 +7,42 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#010102" />
-
-    <title>JWT Debugger — Decode, Verify &amp; Generate JSON Web Tokens</title>
-    <meta name="description" content="A free, open-source JWT debugger. Decode, verify, and generate JSON Web Tokens (HS256/384/512, RS256/384/512, ES256/384/512) entirely client-side — your tokens and keys never leave the browser." />
-    <meta name="keywords" content="JWT, JSON Web Token, JWT decoder, JWT debugger, JWT verifier, JWT generator, HS256, RS256, ES256, jwt.io alternative" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://jwtdev.com/" />
 
-    <!-- Open Graph -->
+    <!--seo-->
+    <!-- Everything between the seo markers is regenerated per route by
+         scripts/prerender.mjs at build time. The values below are the home page's,
+         and are what the dev server serves. Edit them in src/seo/site.ts, not here. -->
+    <title>JWT Debugger — Decode, Verify &amp; Generate JSON Web Tokens</title>
+    <meta name="description" content="Free, open-source JWT debugger. Decode, verify, and generate JSON Web Tokens (HS256/384/512, RS256/384/512, ES256/384/512) entirely in your browser — tokens and keys never leave your machine." />
+    <link rel="canonical" href="https://jwtdev.com/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="JWT Debugger" />
     <meta property="og:url" content="https://jwtdev.com/" />
-    <meta property="og:title" content="JWT Debugger — Decode, Verify & Generate JSON Web Tokens" />
-    <meta property="og:description" content="A free, open-source JWT debugger. Decode, verify, and generate JSON Web Tokens entirely client-side — your tokens and keys never leave the browser." />
+    <meta property="og:title" content="JWT Debugger — Decode, Verify &amp; Generate JSON Web Tokens" />
+    <meta property="og:description" content="Free, open-source JWT debugger. Decode, verify, and generate JSON Web Tokens entirely in your browser — tokens and keys never leave your machine." />
     <meta property="og:image" content="https://jwtdev.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-
-    <!-- Twitter Card -->
+    <meta property="og:image:alt" content="JWT Debugger — decode, verify and generate JSON Web Tokens in your browser" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="JWT Debugger — Decode, Verify & Generate JSON Web Tokens" />
-    <meta name="twitter:description" content="A free, open-source JWT debugger. Decode, verify, and generate JSON Web Tokens entirely client-side — your tokens and keys never leave the browser." />
+    <meta name="twitter:title" content="JWT Debugger — Decode, Verify &amp; Generate JSON Web Tokens" />
+    <meta name="twitter:description" content="Free, open-source JWT debugger. Decode, verify, and generate JSON Web Tokens entirely in your browser — tokens and keys never leave your machine." />
     <meta name="twitter:image" content="https://jwtdev.com/og-image.png" />
+    <!--/seo-->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.googletagmanager.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "JWT Debugger",
-        "url": "https://jwtdev.com/",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Any (runs in browser)",
-        "description": "A free, client-side JWT debugger to decode, verify, and generate JSON Web Tokens. Supports HS256/384/512, RS256/384/512, and ES256/384/512. Tokens and keys never leave the browser.",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        }
-      }
-    </script>
+    <!-- Loaded non-blocking: the faces already fall back to system sans/mono, and
+         `display=swap` meant text swapped in late anyway. Keeping the stylesheet off the
+         critical path removes a third-party round trip from Largest Contentful Paint. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" media="print" onload="this.media='all';this.onload=null">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap">
+    </noscript>
 
     <!-- Google tag (gtag.js) — Consent Mode v2: analytics_storage defaults to
          denied (no cookie set) until the user accepts the banner in-app. -->
@@ -71,7 +63,7 @@
   <body>
     <div id="root"></div>
     <noscript>
-      <p>JWT Debugger requires JavaScript — it's a client-side tool for decoding, verifying, and generating JSON Web Tokens (HS256/384/512, RS256/384/512, ES256/384/512) directly in your browser. Please enable JavaScript to use it.</p>
+      <p>JWT Debugger requires JavaScript to decode, verify, and generate JSON Web Tokens — it is a client-side tool that runs entirely in your browser. Please enable JavaScript to use it.</p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>

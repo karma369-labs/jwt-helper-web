@@ -1,42 +1,67 @@
-import { useCallback, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { useJwt } from './hooks/useJwt';
-import { Tabs, type TabId } from './components/layout/Tabs';
+import { SiteNav } from './components/layout/SiteNav';
+import { Logo } from './components/layout/Logo';
+import { SiteFooter } from './components/layout/SiteFooter';
 import { ConsentBanner } from './components/layout/ConsentBanner';
+import { FaqSection } from './components/layout/FaqSection';
 import { DecoderPage } from './pages/DecoderPage';
 import { EncoderPage } from './pages/EncoderPage';
-import { track, trackPageView } from './core/analytics';
-
-const tabPages: Record<TabId, { path: string; title: string }> = {
-  decode: { path: '/decoder', title: 'JWT Decoder' },
-  encode: { path: '/encoder', title: 'JWT Encoder' },
-};
+import { JwtDecrypterPage } from './pages/JwtDecrypterPage';
+import { Seo } from './seo/Seo';
+import { routeByPath } from './seo/site';
+import { trackPageView } from './core/analytics';
 
 function App() {
+  // Held above <Routes> deliberately: navigating between Decoder, Encoder, and Decrypter
+  // remounts the page components but not this hook, so in-progress work survives the move
+  // exactly as it did with the old in-app tab toggle.
   const jwt = useJwt();
-  const [tab, setTab] = useState<TabId>('decode');
 
-  // There's no router, so the tab toggle is the only "navigation" GA can see —
-  // report it as both an event and a virtual page_view.
-  const handleTabChange = useCallback(
-    (next: TabId) => {
-      if (next === tab) return;
-      track('tab_switch', { tab: next, from: tab });
-      trackPageView(tabPages[next].path, tabPages[next].title);
-      setTab(next);
-    },
-    [tab]
-  );
+  const location = useLocation();
+  const route = routeByPath(location.pathname);
+
+  // gtag's own config call already reports the initial load; only report navigations after it.
+  const isInitialRender = useRef(true);
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      return;
+    }
+    trackPageView(location.pathname, route.title);
+  }, [location.pathname, route.title]);
 
   return (
     <div className="app">
+      <Seo route={route} />
+
       <header className="app__header">
-        <h1>JWT Debugger</h1>
-        <Tabs active={tab} onChange={handleTabChange} />
+        <Link to="/" className="app__brand">
+          <Logo />
+          <span className="app__brand-name">JWT Debugger</span>
+        </Link>
+        <SiteNav />
       </header>
 
+      <div className="app__intro">
+        <h1 className="app__title">{route.h1}</h1>
+        <p className="app__lede">{route.intro}</p>
+      </div>
+
       <main className="app__main">
-        {tab === 'decode' ? <DecoderPage {...jwt} /> : <EncoderPage {...jwt} />}
+        <Routes>
+          <Route path="/" element={<DecoderPage {...jwt} />} />
+          <Route path="/encoder" element={<EncoderPage {...jwt} />} />
+          <Route path="/jwt-decrypter" element={<JwtDecrypterPage {...jwt} />} />
+          {/* Unknown paths render the decoder rather than a dead end. */}
+          <Route path="*" element={<DecoderPage {...jwt} />} />
+        </Routes>
       </main>
+
+      <FaqSection faqs={route.faqs} />
+
+      <SiteFooter />
 
       <ConsentBanner />
     </div>
