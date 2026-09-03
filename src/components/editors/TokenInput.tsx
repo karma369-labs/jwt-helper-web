@@ -77,7 +77,7 @@ function TokenInputImpl({ token, onChange, onClear, parseError }: Props) {
         <div className="token-input__actions">
           <button
             type="button"
-            className={`button-secondary ${copied ? 'button--copied' : ''}`}
+            className={`button-secondary button-secondary--sm ${copied ? 'button--copied' : ''}`}
             onClick={() => copy(token)}
             disabled={isEmpty}
           >
@@ -98,7 +98,7 @@ function TokenInputImpl({ token, onChange, onClear, parseError }: Props) {
               </>
             )}
           </button>
-          <button type="button" className="button-secondary" onClick={handleClear} disabled={isEmpty}>
+          <button type="button" className="button-secondary button-secondary--sm" onClick={handleClear} disabled={isEmpty}>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path d="M2.5 2.5L9.5 9.5M9.5 2.5L2.5 9.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
             </svg>

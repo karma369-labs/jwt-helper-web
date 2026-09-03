@@ -34,7 +34,6 @@ export function EncoderPage(jwt: UseJwtReturn) {
         <div className="app__column-header">
           <div className="app__column-title">
             <h2>Configuration</h2>
-            <span className="app__column-subtitle">Header, payload claims &amp; expiry</span>
           </div>
           <AlgSelect alg={alg} onChange={setAlg} />
         </div>
@@ -48,7 +47,6 @@ export function EncoderPage(jwt: UseJwtReturn) {
         <div className="app__column-header">
           <div className="app__column-title">
             <h2>Sign &amp; Output</h2>
-            <span className="app__column-subtitle">Sign key &amp; real-time generated JWT</span>
           </div>
         </div>
 
@@ -59,12 +57,11 @@ export function EncoderPage(jwt: UseJwtReturn) {
         <div className="encoder__output">
           <div className="encoder__output-header">
             <div className="encoder__output-title">
-              <span className="output-dot" />
               <span>Encoded Token</span>
             </div>
             <button
               type="button"
-              className={`button-secondary ${copied ? 'button--copied' : ''}`}
+              className={`button-secondary button-secondary--sm ${copied ? 'button--copied' : ''}`}
               onClick={() => copy(token)}
             >
               {copied ? (

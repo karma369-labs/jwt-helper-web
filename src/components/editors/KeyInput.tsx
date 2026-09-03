@@ -27,11 +27,10 @@ function KeyInputImpl({ keyInputType, keyMaterial, onChange, variant = 'sign' }:
     <div className="key-section">
       <div className="card-header-bar">
         <div className="card-header-bar__title-wrap">
-          <span className="key-pip" />
           <span className="card-header-bar__title">
             {variant === 'verify' ? 'Signature Verification' : 'Signature Key'}
           </span>
-          {variant === 'verify' && <span className="card-header-bar__tag">optional</span>}
+          {variant === 'verify' && <span className="tag">optional</span>}
         </div>
         <span className="card-header-bar__hint">
           {keyInputType === 'secret' ? 'HMAC secret' : 'Key pair'}
@@ -45,7 +44,7 @@ function KeyInputImpl({ keyInputType, keyMaterial, onChange, variant = 'sign' }:
               <label htmlFor="key-secret">Secret Key</label>
               <button
                 type="button"
-                className={`button-secondary ${copied ? 'button--copied' : ''}`}
+                className={`button-secondary button-secondary--sm ${copied ? 'button--copied' : ''}`}
                 onClick={() => copy(keyMaterial.secret ?? '')}
               >
                 {copied ? (

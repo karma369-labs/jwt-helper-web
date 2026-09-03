@@ -18,7 +18,12 @@ export function LazyJsonPane(props: JsonPaneProps) {
   useEffect(() => setHydrated(true), []);
 
   const fallback = (
-    <JsonPaneFallback title={props.title} accentClass={props.accentClass} readOnly={props.readOnly} />
+    <JsonPaneFallback
+      title={props.title}
+      accentClass={props.accentClass}
+      readOnly={props.readOnly}
+      value={props.value}
+    />
   );
 
   if (!hydrated) return fallback;
@@ -30,16 +35,27 @@ export function LazyJsonPane(props: JsonPaneProps) {
   );
 }
 
-function JsonPaneFallback({ title, accentClass, readOnly }: Pick<JsonPaneProps, 'title' | 'accentClass' | 'readOnly'>) {
+function JsonPaneFallback({
+  title,
+  accentClass,
+  readOnly,
+  value,
+}: Pick<JsonPaneProps, 'title' | 'accentClass' | 'readOnly' | 'value'>) {
+  // The editor replaces this node on hydration, so any difference between the two heights
+  // lands directly in Cumulative Layout Shift. Reserve the height CodeMirror will take:
+  // one 1.4em line per JSON line plus its padding, clamped to the same min/max the
+  // <CodeMirror> element is configured with. Kept in em so it tracks .cm-editor's font-size.
+  const lines = JSON.stringify(value, null, 2).split('\n').length;
+
   return (
     <div className={`json-pane ${accentClass}`}>
       <div className="json-pane__header">
         <span>
           {title}
-          {readOnly && <span className="json-pane__readonly-tag"> (read-only)</span>}
+          {readOnly && <span className="tag"> (read-only)</span>}
         </span>
       </div>
-      <div className="json-pane__skeleton" />
+      <div className="json-pane__skeleton" style={{ height: `calc(${lines} * 1.4em + 32px)` }} />
     </div>
   );
 }

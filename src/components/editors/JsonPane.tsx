@@ -53,9 +53,8 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
     <div className={`json-pane ${accentClass}`}>
       <div className="json-pane__header">
         <div className="json-pane__title-wrap">
-          <span className="pane-pip" />
           <span className="json-pane__title">{title}</span>
-          {readOnly && <span className="json-pane__readonly-tag">read-only</span>}
+          {readOnly && <span className="tag">read-only</span>}
         </div>
 
         <div className="json-pane__controls">
@@ -84,7 +83,7 @@ function JsonPaneImpl({ title, value, onChange, accentClass, claimsTable, readOn
 
           <button
             type="button"
-            className={`json-pane__copy ${copied ? 'button--copied' : ''}`}
+            className={`button-secondary button-secondary--sm ${copied ? 'button--copied' : ''}`}
             onClick={() => copy(text)}
             aria-label={`Copy ${title} JSON`}
           >

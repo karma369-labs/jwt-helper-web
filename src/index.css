@@ -309,12 +309,6 @@ body {
   margin: 0;
 }
 
-.app__column-subtitle {
-  font-size: 12px;
-  color: var(--ink-subtle);
-  font-weight: 400;
-}
-
 /* General Button Styles matching emil-design-eng */
 button {
   font-family: var(--sans);
@@ -379,6 +373,13 @@ button:focus-visible {
   .button-secondary:active {
     transform: scale(0.97) translateY(0);
   }
+}
+
+/* Compact variant for copy/clear actions sitting inside a card header or toolbar. */
+.button-secondary--sm {
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
 }
 
 .button--copied {
@@ -504,36 +505,9 @@ button:focus-visible {
   gap: 8px;
 }
 
-.pane-pip {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.pane--header .pane-pip {
-  background: var(--header-accent);
-  box-shadow: 0 0 8px rgba(255, 92, 119, 0.5);
-}
-
-.pane--payload .pane-pip {
-  background: var(--payload-accent);
-  box-shadow: 0 0 8px rgba(255, 173, 66, 0.5);
-}
-
 .json-pane__title {
   color: var(--ink);
   font-weight: 600;
-}
-
-.json-pane__readonly-tag {
-  color: var(--ink-subtle);
-  font-weight: 400;
-  font-size: 11px;
-  background: var(--surface-2);
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid var(--hairline);
 }
 
 .json-pane__controls {
@@ -584,19 +558,13 @@ button:focus-visible {
   }
 }
 
-.json-pane__copy {
-  background: var(--surface-2);
-  border: 1px solid var(--hairline);
-  color: var(--ink-subtle);
-  font-size: 11.5px;
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-
-.json-pane__copy:hover {
-  color: var(--ink);
-  border-color: var(--hairline-strong);
-  background: var(--surface-3);
+/* Placeholder shown until the CodeMirror chunk arrives. Height is set inline from the JSON's
+   line count (see LazyJsonPane) and clamped here to the same bounds the editor is configured
+   with, so swapping the editor in does not shift the page. */
+.json-pane__skeleton {
+  font-size: 13.5px;
+  min-height: 96px;
+  max-height: 340px;
 }
 
 /* CodeMirror customization */
@@ -734,7 +702,7 @@ button:focus-visible {
 
 .token-input__textarea {
   width: 100%;
-  min-height: 220px;
+  min-height: 140px;
   background: var(--surface-2);
   border: 1px solid var(--hairline);
   border-radius: 8px;
@@ -754,7 +722,7 @@ button:focus-visible {
 
 .token-input__viewer {
   width: 100%;
-  min-height: 220px;
+  min-height: 140px;
   background: var(--surface-2);
   border: 1px solid var(--hairline);
   border-radius: 8px;
@@ -838,11 +806,8 @@ button:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  border: 1px solid transparent;
 }
 
 .validity-dot {
@@ -852,9 +817,7 @@ button:focus-visible {
 }
 
 .validity-badge--valid {
-  color: var(--state-valid);
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.2);
+  color: var(--ink-subtle);
 }
 .validity-badge--valid .validity-dot {
   background: var(--state-valid);
@@ -863,8 +826,6 @@ button:focus-visible {
 
 .validity-badge--invalid {
   color: var(--state-invalid);
-  background: rgba(244, 63, 94, 0.1);
-  border-color: rgba(244, 63, 94, 0.2);
 }
 .validity-badge--invalid .validity-dot {
   background: var(--state-invalid);
@@ -902,7 +863,8 @@ button:focus-visible {
   font-weight: 600;
 }
 
-.card-header-bar__tag {
+/* Inline qualifier next to a card title ("read-only", "optional"). */
+.tag {
   color: var(--ink-subtle);
   font-weight: 400;
   font-size: 11px;
@@ -1044,15 +1006,6 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-}
-
-.key-pip {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--signature-accent);
-  box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
 }
 
 .key-section__optional-tag {
@@ -1209,20 +1162,12 @@ button:focus-visible {
   color: var(--ink);
 }
 
-.output-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--primary-hover);
-  box-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
-}
-
 .encoder__token-box {
   padding: var(--space-md);
   font-family: var(--mono);
   font-size: 13.5px;
   line-height: 1.6;
-  min-height: 160px;
+  min-height: 140px;
   background: var(--surface-2);
   word-break: break-all;
   border-bottom: 1px solid var(--hairline);
@@ -1434,18 +1379,54 @@ button:focus-visible {
 
 /* Site Footer */
 .site-footer {
-  margin-top: var(--space-xl);
-  padding-top: var(--space-lg);
+  margin-top: var(--space-xxl);
+  padding-top: var(--space-xl);
   border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-xl);
+}
+
+.site-footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-width: 42ch;
+}
+
+.site-footer__wordmark {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+}
+
+.site-footer__tagline {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-tertiary);
+}
+
+.site-footer__col {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
 }
 
-.site-footer__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-md);
+.site-footer__heading {
+  margin: 0 0 var(--space-xxs);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
 }
 
 .site-footer__link {
@@ -1461,10 +1442,22 @@ button:focus-visible {
   }
 }
 
-.site-footer__note {
+.site-footer__bar {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--hairline-tertiary);
   font-size: 12px;
   color: var(--ink-tertiary);
-  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+  }
+
+  .site-footer__brand {
+    grid-column: 1 / -1;
+  }
 }
 
 /* Responsive tweaks */
