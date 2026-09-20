@@ -11,7 +11,7 @@ import { NavLink } from 'react-router-dom';
 // crawlers to reach and index it on a site this small.
 const links: { to: string; label: string }[] = [
   { to: '/', label: 'Decoder' },
-  { to: '/encoder', label: 'Encoder' },
+  { to: '/jwt-encoder-online', label: 'Encoder' },
 ];
 
 function SiteNavImpl() {

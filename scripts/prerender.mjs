@@ -85,10 +85,15 @@ async function main() {
   }
 
   const server = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
-  const { render, routes, canonicalFor, jsonLdForRoute } = server;
+  const { render, allRoutes, notFoundRoute, canonicalFor, jsonLdForRoute, preloadArticle } = server;
+  const routes = allRoutes();
 
-  for (const route of routes) {
+  // The 404 page renders through the same shell but lands at dist/404.html for the host's
+  // ErrorDocument rule, and is left out of the sitemap.
+  for (const route of [...routes, notFoundRoute]) {
     const canonical = canonicalFor(route.path);
+    // Article bodies are lazy chunks; renderToString cannot await them, so warm the cache first.
+    await preloadArticle(route.path);
     const appHtml = render(route.path);
 
     // Replacer *functions*, not strings: in a replacement string `$&`, `$\``, `$'` and `$1`
@@ -103,11 +108,13 @@ async function main() {
     const outFile =
       route.path === '/'
         ? join(distDir, 'index.html')
-        : join(distDir, route.path.replace(/^\//, ''), 'index.html');
+        : route === notFoundRoute
+          ? join(distDir, '404.html')
+          : join(distDir, route.path.replace(/^\//, ''), 'index.html');
 
     await mkdir(dirname(outFile), { recursive: true });
     await writeFile(outFile, html, 'utf8');
-    console.log(`  prerendered ${route.path.padEnd(16)} -> ${outFile.replace(root, '.')}`);
+    console.log(`  prerendered ${route.path.padEnd(40)} -> ${outFile.replace(root, '.')}`);
   }
 
   await writeFile(join(distDir, 'sitemap.xml'), sitemap(routes, canonicalFor), 'utf8');

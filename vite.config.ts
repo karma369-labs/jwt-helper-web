@@ -1,24 +1,40 @@
+import { existsSync, readFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { contentPlugin } from './scripts/vite-plugin-content.ts'
 
 /**
- * Serves `/encoder` from `dist/encoder/index.html` in `vite preview`.
+ * Makes `vite preview` behave like the production host (public/.htaccess):
+ * `/guides` is served from `dist/guides/index.html`, and unknown paths get the
+ * prerendered `dist/404.html` with a 404 status.
  *
- * Static hosts (Vercel, Netlify, Cloudflare Pages) resolve extensionless URLs to the
- * directory's index.html as standard behaviour, but Vite's preview server returns 404.
- * Without this, preview cannot exercise the same URLs that are in the sitemap and the
- * canonical tags, which is how the earlier hydration mismatch went unnoticed.
+ * Vite's preview server would otherwise 404 every extensionless URL, so preview could not
+ * exercise the URLs in the sitemap and canonical tags, which is how an earlier hydration
+ * mismatch went unnoticed.
  */
 function cleanUrlsInPreview(): Plugin {
+  let outDir = 'dist';
   return {
     name: 'clean-urls-in-preview',
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir);
+    },
     configurePreviewServer(server) {
-      server.middlewares.use((req, _res, next) => {
+      server.middlewares.use((req, res, next) => {
         const [path, query] = (req.url ?? '/').split('?');
-        if (path !== '/' && !path.endsWith('/') && !path.split('/').pop()?.includes('.')) {
-          req.url = `${path}/index.html${query ? `?${query}` : ''}`;
+        const isPage = path !== '/' && !path.split('/').pop()?.includes('.');
+        if (!isPage) return next();
+
+        const clean = path.replace(/\/$/, '');
+        if (existsSync(join(outDir, clean, 'index.html'))) {
+          req.url = `${clean}/index.html${query ? `?${query}` : ''}`;
+          return next();
         }
-        next();
+
+        res.statusCode = 404;
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.end(readFileSync(join(outDir, '404.html')));
       });
     },
   };
@@ -26,14 +42,14 @@ function cleanUrlsInPreview(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig(({ isPreview }) => ({
-  plugins: [react(), cleanUrlsInPreview()],
+  plugins: [react(), contentPlugin(), cleanUrlsInPreview()],
 
-  // `bun run build` prerenders each route to its own file (dist/encoder/index.html, ...),
+  // `bun run build` prerenders each route to its own file (dist/guides/index.html, ...),
   // so the preview server must serve those directly. Left as the default 'spa', its history
   // fallback returns the home page's HTML for every path, and the client then hydrates a
   // different route than the server rendered.
   //
-  // The dev server keeps the SPA fallback: nothing is prerendered there, so /encoder has to
+  // The dev server keeps the SPA fallback: nothing is prerendered there, so /guides has to
   // fall through to index.html for the router to pick it up.
   //
   // Production hosting must behave like preview does here — serve directory index files and

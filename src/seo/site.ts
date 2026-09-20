@@ -1,7 +1,10 @@
 /**
- * Single source of truth for per-route SEO metadata and FAQ content.
+ * Single source of truth for hand-written per-route SEO metadata and FAQ content.
  * Drives the prerendered head, sitemap.xml, the on-page h1/lead/FAQ, and <Seo>.
- * Adding a route here plus a <Route> in App.tsx is all a new page needs.
+ * Adding a tool or static page = an entry here plus a <Route> in App.tsx.
+ *
+ * Articles are not listed here: their metadata comes from markdown frontmatter under
+ * `content/` and is merged in by `allRoutes()` in ./routes.ts.
  */
 
 export const SITE_ORIGIN = 'https://jwtdev.com';
@@ -11,9 +14,18 @@ export interface Faq {
   answer: string;
 }
 
+export type RouteKind = 'tool' | 'section' | 'article' | 'page';
+
 export interface RouteSeo {
   /** Route path; also the sitemap `loc` and the prerender output directory. */
   path: string;
+  /**
+   * `tool` — the money pages; get WebApplication JSON-LD and the header nav.
+   * `section` — /blog, /guides, /use-cases index pages.
+   * `article` — derived from content/*.md frontmatter, see src/seo/routes.ts.
+   * `page` — everything else (/about).
+   */
+  kind: RouteKind;
   title: string;
   description: string;
   /** Visible <h1>, distinct per page — the strongest on-page relevance signal. */
@@ -29,9 +41,10 @@ export interface RouteSeo {
 export const routes: RouteSeo[] = [
   {
     path: '/',
+    kind: 'tool',
     title: 'JWT Debugger — Decode, Verify & Generate JSON Web Tokens',
     description:
-      'Free, open-source JWT debugger. Decode, verify, and generate JSON Web Tokens (HS256/384/512, RS256/384/512, ES256/384/512) entirely in your browser — tokens and keys never leave your machine.',
+      'Free JWT debugger. Decode, verify, and generate JSON Web Tokens (HS256/384/512, RS256/384/512, ES256/384/512) entirely in your browser — tokens and keys never leave your machine.',
     h1: 'Decode, Verify & Generate JSON Web Tokens',
     intro:
       'Paste a JSON Web Token to decode its header and payload instantly, then add a secret or public key to verify the signature. Nothing leaves your browser.',
@@ -65,12 +78,13 @@ export const routes: RouteSeo[] = [
       {
         question: 'Can I use this instead of jwt.io?',
         answer:
-          'Yes. This tool covers the same core workflow — decoding, verifying, and generating tokens across HS256/384/512, RS256/384/512, and ES256/384/512 — as a free, open-source, fully client-side alternative.',
+          'Yes. This tool covers the same core workflow — decoding, verifying, and generating tokens across HS256/384/512, RS256/384/512, and ES256/384/512 — as a free, fully client-side alternative.',
       },
     ],
   },
   {
-    path: '/encoder',
+    path: '/jwt-encoder-online',
+    kind: 'tool',
     title: 'JWT Encoder — Generate & Sign JSON Web Tokens Online',
     description:
       'Generate and sign a JSON Web Token in your browser. Edit the header and payload, choose HS256, RS256, or ES256, set an expiry, and get a signed JWT — entirely client-side.',
@@ -108,6 +122,7 @@ export const routes: RouteSeo[] = [
   },
   {
     path: '/jwt-decrypter',
+    kind: 'tool',
     title: 'JWT Decrypter — Decrypt & Decode a JSON Web Token Online',
     description:
       'Trying to decrypt a JWT? Most JSON Web Tokens are signed, not encrypted — the payload is base64url-encoded and readable by anyone. Decode any JWT here instantly, in your browser.',
@@ -143,12 +158,47 @@ export const routes: RouteSeo[] = [
       },
     ],
   },
+  {
+    path: '/blog',
+    kind: 'section',
+    title: 'JWT Blog — Concepts, Algorithms & Security Explained',
+    description:
+      'Plain-language articles on how JSON Web Tokens work: structure, signing algorithms, HS256 vs RS256, expiry, and the security mistakes that keep showing up in production.',
+    h1: 'JWT Blog',
+    intro:
+      'How JSON Web Tokens work, which algorithm to pick, and the mistakes that turn a signed token into a security hole.',
+    lastmod: '2026-09-20',
+    faqs: [],
+  },
+  {
+    path: '/guides',
+    kind: 'section',
+    title: 'JWT Guides — Sign & Verify Tokens in Node.js, Python, Java, Go',
+    description:
+      'Step-by-step guides to issuing and verifying JSON Web Tokens in popular languages and frameworks, with working code, key handling, and the validation checks that matter.',
+    h1: 'JWT Guides',
+    intro:
+      'Working code for signing and verifying JSON Web Tokens in the languages you actually ship, with the validation steps that libraries leave to you.',
+    lastmod: '2026-09-20',
+    faqs: [],
+  },
+  {
+    path: '/use-cases',
+    kind: 'section',
+    title: 'JWT Use Cases — Auth0, AWS Cognito, Firebase Token Guides',
+    description:
+      'What the tokens from Auth0, Amazon Cognito, and Firebase Authentication actually contain, how to verify them, and how to debug the errors each platform throws.',
+    h1: 'JWT Use Cases',
+    intro:
+      'What the tokens from Auth0, Cognito, and Firebase contain, how to verify them on your backend, and how to read the errors each platform throws.',
+    lastmod: '2026-09-20',
+    faqs: [],
+  },
 ];
 
-export function routeByPath(path: string): RouteSeo {
-  // Normalise a trailing slash so '/encoder/' and '/encoder' resolve alike.
-  const normalised = path !== '/' ? path.replace(/\/$/, '') : path;
-  return routes.find((r) => r.path === normalised) ?? routes[0];
+export function normalisePath(path: string): string {
+  // Normalise a trailing slash so '/guides/' and '/guides' resolve alike.
+  return path !== '/' ? path.replace(/\/$/, '') : path;
 }
 
 export function canonicalFor(path: string): string {

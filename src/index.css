@@ -1389,7 +1389,7 @@ button:focus-visible {
 
 .site-footer__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
   gap: var(--space-xl);
 }
 
@@ -1522,5 +1522,392 @@ button:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Content pages: articles, section indexes, 404. Single column, reading width. */
+.page--article,
+.page--section,
+.page--not-found {
+  display: block;
+  max-width: 780px;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 12px;
+  color: var(--ink-tertiary);
+  margin-bottom: var(--space-xs);
+}
+
+.crumbs__link {
+  color: var(--ink-subtle);
+  text-decoration: none;
+  transition: color 150ms var(--ease-out);
+}
+
+.crumbs__sep {
+  color: var(--ink-tertiary);
+}
+
+.article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 12px;
+  color: var(--ink-tertiary);
+  margin: 0 0 var(--space-lg);
+}
+
+.article-meta__sep {
+  color: var(--ink-tertiary);
+}
+
+/* Long-form overrides on top of the base .prose used by the decrypter explainer. */
+.prose--article {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.prose--article h2 {
+  font-size: 20px;
+  margin-top: var(--space-xl);
+  scroll-margin-top: var(--space-lg);
+}
+
+.prose--article h2:first-child {
+  margin-top: 0;
+}
+
+.prose--article h3 {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+  margin: var(--space-lg) 0 var(--space-xs);
+  scroll-margin-top: var(--space-lg);
+}
+
+.prose--article p,
+.prose--article li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+
+.prose--article ul,
+.prose--article ol {
+  margin: 0 0 var(--space-md);
+  padding-left: 22px;
+}
+
+.prose--article li {
+  margin-bottom: 6px;
+}
+
+.prose--article li > p {
+  margin-bottom: 6px;
+}
+
+.prose--article a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--hairline-strong);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms var(--ease-out);
+}
+
+.prose--article strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.prose--article blockquote {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-xs) var(--space-md);
+  border-left: 2px solid var(--hairline-strong);
+  color: var(--ink-subtle);
+}
+
+.prose--article blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.prose--article hr {
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin: var(--space-xl) 0;
+}
+
+.prose--article img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--hairline);
+}
+
+/* Code blocks. Shiki inlines token colours; the frame is ours so it matches the editors. */
+.prose--article pre {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--surface-1) !important;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prose--article pre code {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+.prose--article pre:focus-visible {
+  outline: 2px solid var(--hairline-strong);
+  outline-offset: 2px;
+}
+
+.prose--article table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 0 0 var(--space-md);
+  display: block;
+  overflow-x: auto;
+}
+
+.prose--article th,
+.prose--article td {
+  text-align: left;
+  padding: 10px var(--space-sm);
+  border-bottom: 1px solid var(--hairline-tertiary);
+  vertical-align: top;
+  color: var(--ink-muted);
+}
+
+.prose--article thead th {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--hairline);
+}
+
+.prose--loading p {
+  color: var(--ink-tertiary);
+}
+
+/* "Try it in the browser" callout at the foot of an article. */
+.tool-callout {
+  margin-top: var(--space-xl);
+  padding: var(--space-md) var(--space-lg);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.tool-callout__heading {
+  margin: 0 0 var(--space-sm);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+}
+
+.tool-callout__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.tool-callout__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 8px;
+  background: var(--surface-3);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 100ms var(--ease-out);
+}
+
+.tool-callout__arrow {
+  color: var(--ink-subtle);
+}
+
+.tool-callout__note {
+  margin: var(--space-sm) 0 0;
+  font-size: 12px;
+  color: var(--ink-tertiary);
+}
+
+/* Section index list (/blog, /guides, /use-cases). */
+.section-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.section-list__empty {
+  color: var(--ink-tertiary);
+  font-size: 14px;
+}
+
+.section-list__link {
+  display: block;
+  padding: var(--space-md) var(--space-lg);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-2);
+  text-decoration: none;
+  transition: border-color 150ms var(--ease-out), background-color 150ms var(--ease-out);
+}
+
+.section-list__title {
+  margin: 0 0 6px;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+}
+
+.section-list__desc {
+  margin: 0 0 var(--space-xs);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.section-list__meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-tertiary);
+}
+
+/* "Further reading" strip under a tool. */
+.further {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--hairline);
+}
+
+.further__heading {
+  margin: 0 0 var(--space-sm);
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+
+.further__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-sm);
+}
+
+.further__link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--surface-2);
+  text-decoration: none;
+  transition: border-color 150ms var(--ease-out), background-color 150ms var(--ease-out);
+}
+
+.further__title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.further__desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-subtle);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 404 */
+.not-found {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-lg);
+}
+
+.not-found__heading {
+  margin: 0 0 var(--space-xs);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+}
+
+.not-found__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.not-found__link {
+  font-size: 14px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: color 150ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .crumbs__link:hover,
+  .not-found__link:hover {
+    color: var(--ink);
+  }
+
+  .prose--article a:hover {
+    text-decoration-color: var(--ink);
+  }
+
+  .tool-callout__link:hover {
+    background: var(--surface-4);
+    border-color: var(--ink-tertiary);
+    transform: translateY(-1px);
+  }
+
+  .section-list__link:hover,
+  .further__link:hover {
+    border-color: var(--hairline-strong);
+    background: var(--surface-3);
   }
 }

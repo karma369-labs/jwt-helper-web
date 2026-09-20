@@ -1,0 +1,41 @@
+# jwtdev.com — served from cPanel/LiteSpeed. Vite copies this into dist/ on every build.
+#
+# The build writes one directory per route (dist/guides/index.html, ...). These rules make
+# the host serve /guides from that file without redirecting to /guides/, so the URL the
+# browser lands on matches the <link rel="canonical"> baked into the page.
+
+RewriteEngine On
+DirectorySlash Off
+
+# The encoder moved. Catch the old slug with or without a trailing slash.
+RewriteRule ^encoder/?$ /jwt-encoder-online [R=301,L]
+
+# Strip trailing slashes from everything else (301) so one URL form is canonical.
+RewriteCond %{REQUEST_URI} ^/(.+)/$
+RewriteRule ^ /%1 [R=301,L]
+
+# Serve /foo from /foo/index.html without a redirect.
+RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+RewriteRule ^([^.]+)$ /$1/index.html [L]
+
+# Prerendered, branded 404 for anything else.
+ErrorDocument 404 /404.html
+
+# Vite hashes js/css file names, so they can be cached forever; HTML must always be revalidated.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  <FilesMatch "\.(js|css|woff2?)$">
+    ExpiresDefault "access plus 1 year"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    ExpiresDefault "access plus 0 seconds"
+  </FilesMatch>
+</IfModule>
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

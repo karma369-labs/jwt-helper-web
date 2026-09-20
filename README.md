@@ -22,8 +22,26 @@ bun run preview   # preview a production build
 ```
 
 
+## Content
+
+Articles are markdown under `content/`. The file path is the URL: `content/guides/foo.md` is
+served at `/guides/foo`. Frontmatter needs `title`, `description`, and `intro`; `date`,
+`lastmod`, `tags`, `relatedTools`, `faqs`, and `draft: true` are optional. Code fences are
+highlighted at build time with shiki. The plugin in `scripts/vite-plugin-content.ts` explains how it is wired.
+
+## Deploy
+
+`bun run build`, then upload the contents of `dist/` to the cPanel document root. `dist/.htaccess`
+(from `public/`) carries the redirects and clean-URL rules the site depends on; make sure hidden
+files are included in the upload. Then check the redirects with `curl -I` against the live domain: `/encoder` should 301 once to `/jwt-encoder-online`, and `/guides/` should 301 to `/guides`.
+
 ## Architecture
 ```
+content/                 # markdown articles; path = URL
+public/.htaccess         # cPanel: 301 /encoder -> /jwt-encoder-online, clean URLs, 404, caching
+scripts/
+  prerender.mjs          # renders every route to static HTML + sitemap.xml
+  vite-plugin-content.ts # markdown -> lazy { meta, html } chunks + virtual:content-index
 src/
   core/jwt/            # pure logic, no React, unit-testable
     decode.ts            # parse/assemble tokens, base64url segment handling
@@ -39,10 +57,16 @@ src/
   components/
     editors/             # TokenInput, JsonPane, KeyInput, AlgSelect
     badges/              # VerifyBadge, ExpiryBadge
-    layout/              # Tabs
+    layout/              # SiteNav, SiteFooter, FaqSection, ConsentBanner, FurtherReading
+  content/               # article chunk loader (preloadArticle / getArticle)
+  seo/                   # site.ts (hand-written routes), routes.ts (allRoutes + articles), jsonLd.ts
   pages/
     DecoderPage.tsx      # paste-a-token workflow; payload pane is read-only
     EncoderPage.tsx      # build-a-token workflow; header/payload fully editable
+    JwtDecrypterPage.tsx # decoder + JWS-vs-JWE explainer
+    ArticlePage.tsx      # markdown article
+    SectionIndexPage.tsx # /blog, /guides, /use-cases
+    NotFoundPage.tsx     # 404, prerendered to dist/404.html
 ```
 
 ## State model
