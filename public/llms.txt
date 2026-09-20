@@ -1,6 +1,6 @@
 # JWT Debugger
 
-> A free, open-source, fully client-side toolkit for working with JSON Web Tokens.
+> A free, fully client-side toolkit for working with JSON Web Tokens.
 > Decoding, signature verification, and token signing all run in the browser using the
 > WebCrypto API. There is no backend: tokens, secrets, and keys are never transmitted
 > or stored anywhere.
@@ -11,10 +11,45 @@
   signature against a secret or public key. Supports HS256/384/512, RS256/384/512, and
   ES256/384/512. Detects tampering by verifying the original token bytes rather than
   re-encoding them.
-- [JWT Encoder](https://jwtdev.com/encoder): Build and sign a new JWT. Edit the header and
-  payload as JSON, choose an algorithm, set an expiry, and supply a secret or PEM private key.
+- [JWT Encoder](https://jwtdev.com/jwt-encoder-online): Build and sign a new JWT. Edit the
+  header and payload as JSON, choose an algorithm, set an expiry, and supply a secret or PEM
+  private key.
 - [JWT Decrypter](https://jwtdev.com/jwt-decrypter): Decode any JWT, plus an explanation of
   why a standard JWT (a JWS) is signed rather than encrypted, and how it differs from a JWE.
+
+## Blog
+
+- [What is a JWT?](https://jwtdev.com/blog/what-is-a-jwt): The three parts of a token, how
+  the signature is verified, and what it does and does not protect.
+- [HS256 vs RS256](https://jwtdev.com/blog/hs256-vs-rs256): Shared secret versus key pair,
+  with a comparison table, the key-confusion attack, and a decision rule.
+- [JWT security best practices](https://jwtdev.com/blog/jwt-security-best-practices): A
+  ten-point checklist: pin the algorithm, validate claims, short lifetimes, HttpOnly cookies.
+
+## Guides
+
+- [Node.js](https://jwtdev.com/guides/jwt-authentication-nodejs): jose and jsonwebtoken,
+  JWKS verification, Express middleware.
+- [Python](https://jwtdev.com/guides/jwt-authentication-python): PyJWT, PyJWKClient, FastAPI
+  dependency, Flask decorator.
+- [Java](https://jwtdev.com/guides/jwt-authentication-java): JJWT 0.12, PEM key loading,
+  Spring Security resource server with audience validation.
+- [Go](https://jwtdev.com/guides/jwt-authentication-go): golang-jwt v5, typed claims, parser
+  options, keyfunc for JWKS, net/http middleware.
+
+## Use cases
+
+- [Auth0](https://jwtdev.com/use-cases/auth0-jwt-verification): ID token vs access token,
+  why you get an opaque token without an audience, JWKS verification, common errors.
+- [AWS Cognito](https://jwtdev.com/use-cases/aws-cognito-jwt-verification): token_use and
+  client_id instead of aud, issuer format, aws-jwt-verify and generic library examples.
+- [Firebase](https://jwtdev.com/use-cases/firebase-jwt-verification): securetoken issuer,
+  project id audience, Google's certificate endpoint, Admin SDK and plain-library verification.
+
+## About
+
+- [About JWT Debugger](https://jwtdev.com/about): What the tool does, why nothing leaves the
+  browser, and how tamper detection is kept correct.
 
 ## Notes for summarisation
 

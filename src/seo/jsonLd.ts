@@ -1,4 +1,14 @@
 import { canonicalFor, SITE_ORIGIN, type RouteSeo } from './site';
+import { isArticleRoute, sectionFor } from './routes';
+
+const SITE_NAME = 'JWT Debugger';
+
+const publisher = {
+  '@type': 'Organization',
+  name: SITE_NAME,
+  url: `${SITE_ORIGIN}/`,
+  logo: { '@type': 'ImageObject', url: `${SITE_ORIGIN}/og-image.png` },
+};
 
 /**
  * Structured data for a route's <head>. Emitted at build time rather than by React so it
@@ -8,18 +18,49 @@ export function jsonLdForRoute(route: RouteSeo): object[] {
   const canonical = canonicalFor(route.path);
   const blocks: object[] = [];
 
-  // The tool itself. Declared on every page so any entry point identifies the app.
-  blocks.push({
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'JWT Debugger',
-    url: canonical,
-    applicationCategory: 'DeveloperApplication',
-    operatingSystem: 'Any (runs in browser)',
-    description: route.description,
-    isAccessibleForFree: true,
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  });
+  // The tool itself, on the tool pages only. Articles describe themselves instead.
+  if (route.kind === 'tool') {
+    blocks.push({
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: SITE_NAME,
+      url: canonical,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Any (runs in browser)',
+      description: route.description,
+      isAccessibleForFree: true,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    });
+  }
+
+  if (route.kind === 'section') {
+    blocks.push({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: route.title,
+      url: canonical,
+      description: route.description,
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/` },
+    });
+  }
+
+  if (isArticleRoute(route) && route.kind === 'article') {
+    const { article } = route;
+    blocks.push({
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: article.title,
+      description: article.description,
+      url: canonical,
+      mainEntityOfPage: canonical,
+      datePublished: article.date,
+      dateModified: article.lastmod,
+      author: publisher,
+      publisher,
+      image: `${SITE_ORIGIN}/og-image.png`,
+      ...(article.tags.length > 0 ? { keywords: article.tags.join(', ') } : {}),
+    });
+  }
 
   if (route.faqs.length > 0) {
     blocks.push({
@@ -33,15 +74,22 @@ export function jsonLdForRoute(route: RouteSeo): object[] {
     });
   }
 
-  // Breadcrumbs only make sense below the root.
+  // Breadcrumbs only make sense below the root. Articles get Home > Section > Article.
   if (route.path !== '/') {
+    const trail = [{ name: SITE_NAME, item: `${SITE_ORIGIN}/` }];
+    const section = sectionFor(route);
+    if (section) trail.push({ name: section.h1, item: canonicalFor(section.path) });
+    trail.push({ name: route.h1, item: canonical });
+
     blocks.push({
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'JWT Debugger', item: `${SITE_ORIGIN}/` },
-        { '@type': 'ListItem', position: 2, name: route.h1, item: canonical },
-      ],
+      itemListElement: trail.map((crumb, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: crumb.name,
+        item: crumb.item,
+      })),
     });
   }
 

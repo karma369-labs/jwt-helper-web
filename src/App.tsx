@@ -6,11 +6,15 @@ import { Logo } from './components/layout/Logo';
 import { SiteFooter } from './components/layout/SiteFooter';
 import { ConsentBanner } from './components/layout/ConsentBanner';
 import { FaqSection } from './components/layout/FaqSection';
+import { FurtherReading } from './components/layout/FurtherReading';
 import { DecoderPage } from './pages/DecoderPage';
 import { EncoderPage } from './pages/EncoderPage';
 import { JwtDecrypterPage } from './pages/JwtDecrypterPage';
+import { ArticlePage } from './pages/ArticlePage';
+import { SectionIndexPage } from './pages/SectionIndexPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { Seo } from './seo/Seo';
-import { routeByPath } from './seo/site';
+import { findRoute, isArticleRoute, notFoundRoute } from './seo/routes';
 import { trackPageView } from './core/analytics';
 
 function App() {
@@ -20,7 +24,7 @@ function App() {
   const jwt = useJwt();
 
   const location = useLocation();
-  const route = routeByPath(location.pathname);
+  const route = findRoute(location.pathname) ?? notFoundRoute;
 
   // gtag's own config call already reports the initial load; only report navigations after it.
   const isInitialRender = useRef(true);
@@ -31,6 +35,16 @@ function App() {
     }
     trackPageView(location.pathname, route.title);
   }, [location.pathname, route.title]);
+
+  // Article and section pages are resolved from the content index rather than fixed
+  // <Route> paths, so one element covers every markdown file under content/.
+  const contentElement = isArticleRoute(route) ? (
+    <ArticlePage key={route.path} route={route} />
+  ) : route.kind === 'section' ? (
+    <SectionIndexPage route={route} />
+  ) : (
+    <NotFoundPage />
+  );
 
   return (
     <div className="app">
@@ -52,12 +66,13 @@ function App() {
       <main className="app__main">
         <Routes>
           <Route path="/" element={<DecoderPage {...jwt} />} />
-          <Route path="/encoder" element={<EncoderPage {...jwt} />} />
+          <Route path="/jwt-encoder-online" element={<EncoderPage {...jwt} />} />
           <Route path="/jwt-decrypter" element={<JwtDecrypterPage {...jwt} />} />
-          {/* Unknown paths render the decoder rather than a dead end. */}
-          <Route path="*" element={<DecoderPage {...jwt} />} />
+          <Route path="*" element={contentElement} />
         </Routes>
       </main>
+
+      {route.kind === 'tool' && <FurtherReading toolPath={route.path} />}
 
       <FaqSection faqs={route.faqs} />
 
